@@ -289,6 +289,7 @@ vim.keymap.set("n", "<Leader>dl", dap.run_last, { desc = "Run Last Debug Session
 vim.keymap.set("n", "<Leader>du", dapui.toggle, { desc = "Toggle DAP UI" })
 
 
+-- helper for C++ namespaces
 local function insert_namespace()
   -- prompt for namespace name
   local namespace = vim.fn.input("Namespace name: ")
@@ -313,5 +314,21 @@ end
 
 vim.keymap.set("n", "<leader>ns", insert_namespace, { desc = "Insert C++ namespace" })
 
+
+-- helper for deleting C++ class copy constructor and operator
+local function insert_deleted_copy_ops()
+  local class_name = vim.fn.input("Class name: ")
+  if class_name == "" then return end
+
+  local lines = {
+	class_name .. "(const " .. class_name .. "&) = delete;",
+	class_name .. "& operator=(const " .. class_name .. "&) = delete;",
+  }
+
+  local row = vim.api.nvim_win_get_cursor(0)[1] -- current line
+  vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+end
+
+vim.keymap.set("n", "<leader>dc", insert_deleted_copy_ops, { noremap = true, silent = true })
 
 
