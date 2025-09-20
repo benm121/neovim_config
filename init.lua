@@ -286,7 +286,32 @@ end, { desc = "Set Log Point" })
 vim.keymap.set("n", "<Leader>dr", dap.repl.open, { desc = "Open REPL" })
 vim.keymap.set("n", "<Leader>dl", dap.run_last, { desc = "Run Last Debug Session" })
 
--- Keymaps for dap-ui
 vim.keymap.set("n", "<Leader>du", dapui.toggle, { desc = "Toggle DAP UI" })
+
+
+local function insert_namespace()
+  -- prompt for namespace name
+  local namespace = vim.fn.input("Namespace name: ")
+  if namespace == "" then return end
+
+  -- get current cursor position
+  local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+
+  -- lines to insert
+  local lines = {
+    "namespace " .. namespace .. " {",
+    "",
+    "} // namespace " .. namespace,
+  }
+
+  -- insert lines at cursor
+  vim.api.nvim_buf_set_lines(0, row, row, false, lines)
+
+  -- move cursor inside namespace block
+  vim.api.nvim_win_set_cursor(0, {row + 1, 0})
+end
+
+vim.keymap.set("n", "<leader>ns", insert_namespace, { desc = "Insert C++ namespace" })
+
 
 
