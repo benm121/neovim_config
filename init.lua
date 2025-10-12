@@ -24,18 +24,6 @@ vim.diagnostic.config({
         underline = true,
 })
 
--- local statusline = {
---   ' %t',
---   '%r',
---   '%m',
---   '%=',
---   '%{&filetype}',
---   ' %2p%%',
---   ' %3l:%-2c '
--- }
---
--- vim.o.statusline = table.concat(statusline, '')
-
 require "paq" {
 	{"savq/paq-nvim" },
     { "neovim/nvim-lspconfig" },
@@ -43,7 +31,6 @@ require "paq" {
     { "williamboman/mason-lspconfig.nvim" },
     { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
 	{ "stevearc/oil.nvim" },
-	{ "ellisonleao/gruvbox.nvim" },
 	{ "nvim-lua/plenary.nvim" },
 	{ "nvim-telescope/telescope.nvim" },
 	{ "Saghen/blink.cmp" },
@@ -63,6 +50,9 @@ require "paq" {
 	{ "rcarriga/nvim-dap-ui" },
 	{ "jay-babu/mason-nvim-dap.nvim" },
 	{ "goolord/alpha-nvim" },
+	{ "brenoprata10/nvim-highlight-colors" },
+	{ "OXY2DEV/markview.nvim" }, -- TODO: fix broken update
+	{ "nvim-mini/mini.indentscope" },
 }
 
 
@@ -86,30 +76,20 @@ require("oil").setup({
 	}
 })
 
-require("gruvbox").setup({
-	terminal_colors = true,
-	undercurl = true,
-	underline = true,
-	bold = true,
-	italic = {
-		strings = false,
-		emphasis = true,
-		comments = true,
-		operators = false,
-		folds = true,
-	},
-	contrast = "hard",
-	palette_overrides = {},
-})
-vim.cmd([[colorscheme gruvbox]])
+vim.cmd([[colorscheme retrobox]])
+vim.cmd([[highlight Normal guibg=#1E211E
+		  highlight LineNr guibg=#1E211E
+		  highlight SignColumn guibg=#1E211E
+		  highlight FoldColumn guibg=#1E211E
+		  highlight CursorLineNr guibg=#1E211E]])
 
 
 require("blink.cmp").setup({
 	fuzzy = { implementation = "lua" },
 	keymap = {
-		['<Tab>'] = { 'select_next', 'fallback' },
-    	['<S-Tab>'] = { 'select_prev', 'fallback' },
-		['<CR>'] = { 'accept', 'fallback' },
+		["<Tab>"] = { "select_next", "fallback" },
+    	["<S-Tab>"] = { "select_prev", "fallback" },
+		["<CR>"] = { "accept", "fallback" },
 	},
 })
 
@@ -128,7 +108,7 @@ require("lsp_signature").setup({
 	hint_prefix = "H - ",
 })
 
-require("wilder").setup({modes = {':', '/', '?'}})
+require("wilder").setup({modes = {":", "/", "?"}})
 
 require("goto-preview").setup()
 
@@ -142,16 +122,19 @@ require("lualine").setup({
 		section_separators = {}
 	},
 	sections = {
-		lualine_a = {'mode'},
-		lualine_b = {'branch', 'diff', 'diagnostics'},
-		lualine_c = {'filename'},
-		lualine_x = {'encoding', 'fileformat', 'filetype'},
-		lualine_y = {'progress'},
-		lualine_z = {'location'}
+		lualine_a = {"mode"},
+		lualine_b = {"branch", "diff", "diagnostics"},
+		lualine_c = {"filename"},
+		lualine_x = {"encoding", "fileformat", "filetype"},
+		lualine_y = {"progress"},
+		lualine_z = {"location"}
 	},
 })
 
 require("nvim-surround").setup()
+
+
+require("nvim-highlight-colors").setup({})
 
 local dap = require("dap")
 
@@ -207,6 +190,26 @@ vim.cmd([[
     autocmd FileType alpha setlocal nofoldenable
 ]])
 
+require("markview").setup()
+
+require("mini.indentscope").setup()
+
+-- only enable indetscope on certain filetypes
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "*",
+    callback = function()
+        vim.b.miniindentscope_disable = true
+    end,
+    desc = "Disable mini.indentscope for all files by default",
+})
+
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "cpp",
+    callback = function()
+        vim.b.miniindentscope_disable = false
+    end,
+    desc = "Enable mini.indentscope for C++ files",
+})
 
 -- ========== KEYMAPS ===========
 
@@ -321,8 +324,8 @@ local function insert_deleted_copy_ops()
   if class_name == "" then return end
 
   local lines = {
-	class_name .. "(const " .. class_name .. "&) = delete;",
-	class_name .. "& operator=(const " .. class_name .. "&) = delete;",
+	class_name .. "(const " .. class_name .. " &) = delete;",
+	class_name .. " &operator=(const " .. class_name .. " &) = delete;",
   }
 
   local row = vim.api.nvim_win_get_cursor(0)[1] -- current line
