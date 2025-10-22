@@ -53,8 +53,10 @@ require "paq" {
 	{ "brenoprata10/nvim-highlight-colors" },
 	{ "OXY2DEV/markview.nvim" }, -- TODO: fix broken update
 	{ "nvim-mini/mini.indentscope" },
+	{ "SmiteshP/nvim-navic" },
 }
 
+vim.cmd([[let g:context_enabled = 1]])
 
 require("mason").setup()
 
@@ -116,6 +118,25 @@ require("auto-session").setup({
 	suppressed_dirs = {"~/"}
 })
 
+local navic = require("nvim-navic")
+
+vim.lsp.config["clangd"] = {
+  cmd = { "clangd" },
+  on_attach = function(client, bufnr)
+    if client.server_capabilities.documentSymbolProvider then
+      navic.attach(client, bufnr)
+    end
+  end,
+}
+
+
+local function navic_location()
+  if navic.is_available() then
+    return navic.get_location()
+  end
+  return ""
+end
+
 require("lualine").setup({
 	options = {
 		component_separators = {left = "|", right = "|"},
@@ -124,7 +145,10 @@ require("lualine").setup({
 	sections = {
 		lualine_a = {"mode"},
 		lualine_b = {"branch", "diff", "diagnostics"},
-		lualine_c = {"filename"},
+		lualine_c = {
+			{ navic_location, color = { fg = "#88C0D0" } },
+		  	-- "filename",
+		},
 		lualine_x = {"encoding", "fileformat", "filetype"},
 		lualine_y = {"progress"},
 		lualine_z = {"location"}
@@ -194,7 +218,7 @@ require("markview").setup()
 
 require("mini.indentscope").setup()
 
--- only enable indetscope on certain filetypes
+-- only enable indentscope on certain filetypes
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "*",
     callback = function()
@@ -210,6 +234,7 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
     desc = "Enable mini.indentscope for C++ files",
 })
+
 
 -- ========== KEYMAPS ===========
 
