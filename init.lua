@@ -29,7 +29,7 @@ require "paq" {
     { "neovim/nvim-lspconfig" },
     { "williamboman/mason.nvim" },
     { "williamboman/mason-lspconfig.nvim" },
-    { 'nvim-treesitter/nvim-treesitter', build = ':TSUpdate' },
+    { "nvim-treesitter/nvim-treesitter", build = ":TSUpdate" },
 	{ "stevearc/oil.nvim" },
 	{ "nvim-lua/plenary.nvim" },
 	{ "nvim-telescope/telescope.nvim" },
@@ -51,9 +51,10 @@ require "paq" {
 	{ "jay-babu/mason-nvim-dap.nvim" },
 	{ "goolord/alpha-nvim" },
 	{ "brenoprata10/nvim-highlight-colors" },
-	{ "OXY2DEV/markview.nvim" }, -- TODO: fix broken update
+	-- { "OXY2DEV/markview.nvim" }, -- update broken
 	{ "nvim-mini/mini.indentscope" },
 	{ "SmiteshP/nvim-navic" },
+	{ "folke/which-key.nvim" },
 }
 
 vim.cmd([[let g:context_enabled = 1]])
@@ -188,20 +189,41 @@ require("mason-nvim-dap").setup({
 local dapui = require("dapui")
 dapui.setup()
 
+-- garbage to get date and time and add greeting on dashboard
+local function date_and_time()
+	local hour = tonumber(os.date("%I"))
+	local merid = os.date("%p")
+	local greeting
+
+	if merid == "AM" then
+		greeting = "Good morning"
+	elseif hour == 12 or hour < 6 then
+		greeting = "Good afternoon"
+	else
+		greeting = "Good evening"
+	end
+
+	return string.format("%s - %s", os.date(hour..":%M"..merid), greeting)
+end
+
 
 local alpha = require("alpha")
 local dashboard = require("alpha.themes.dashboard")
 
 dashboard.section.header.val = {
-"												   ",
-"												   ",
-"███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗",
-"████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║",
-"██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║",
-"██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║",
-"██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║",
-"╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝",
+"												 ",
+
+"███╗░░██╗███████╗░█████╗░██╗░░░██╗██╗███╗░░░███╗",
+"████╗░██║██╔════╝██╔══██╗██║░░░██║██║████╗░████║",
+"██╔██╗██║█████╗░░██║░░██║╚██╗░██╔╝██║██╔████╔██║",
+"██║╚████║██╔══╝░░██║░░██║░╚████╔╝░██║██║╚██╔╝██║",
+"██║░╚███║███████╗╚█████╔╝░░╚██╔╝░░██║██║░╚═╝░██║",
+"╚═╝░░╚══╝╚══════╝░╚════╝░░░░╚═╝░░░╚═╝╚═╝░░░░░╚═╝",
+"												 ",
+"		       "..date_and_time()
 }
+
+
 dashboard.section.buttons.val = {
     dashboard.button( "e", "  > New file" , ":tabnew<CR>"),
     dashboard.button( "s", "  > Sessions", ":AutoSession search<CR>"),
@@ -213,8 +235,6 @@ alpha.setup(dashboard.opts)
 vim.cmd([[
     autocmd FileType alpha setlocal nofoldenable
 ]])
-
-require("markview").setup()
 
 require("mini.indentscope").setup()
 
@@ -236,6 +256,9 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 
+require("which-key").setup()
+
+
 -- ========== KEYMAPS ===========
 
 
@@ -253,15 +276,15 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- telescope
-local builtin = require('telescope.builtin')
-vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
-vim.keymap.set('n', '<leader>fg', builtin.current_buffer_fuzzy_find, { desc = 'Telescope current buffer fuzzy find' })
-vim.keymap.set('n', '<leader>fb', builtin.buffers, { desc = 'Telescope buffers' })
-vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
-vim.keymap.set('n', '<leader>fk', builtin.keymaps, { desc = 'Telescope keymaps' })
-vim.keymap.set('n', '<leader>fs', builtin.lsp_document_symbols, { desc = 'Telescope document symbols' })
-vim.keymap.set('n', '<leader>fm', builtin.man_pages, { desc = 'Telescope man pages' })
-vim.keymap.set('n', '<leader>q', builtin.diagnostics, { desc = 'Telescope diagnostics' })
+local builtin = require("telescope.builtin")
+vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Telescope find files" })
+vim.keymap.set("n", "<leader>fg", builtin.current_buffer_fuzzy_find, { desc = "Telescope current buffer fuzzy find" })
+vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Telescope buffers" })
+vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Telescope help tags" })
+vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Telescope keymaps" })
+vim.keymap.set("n", "<leader>fs", builtin.lsp_document_symbols, { desc = "Telescope document symbols" })
+vim.keymap.set("n", "<leader>fm", builtin.man_pages, { desc = "Telescope man pages" })
+vim.keymap.set("n", "<leader>q", builtin.diagnostics, { desc = "Telescope diagnostics" })
 
 -- barbar
 vim.keymap.set("n", "<C-Right>", ":BufferNext<CR>", { desc = "Move to next buffer" })
@@ -270,11 +293,16 @@ vim.keymap.set("n", "<C-S-Right>", ":BufferMoveNext<CR>", { desc = "Move buffer 
 vim.keymap.set("n", "<C-S-Left>", ":BufferMovePrevious<CR>", { desc = "Move buffer back" })
 vim.keymap.set("n", "<C-Q>", ":BufferClose<CR>", { desc = "Close current buffer" })
 
--- goto-preview
-vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", {noremap=true})
+-- goto definition
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to Definition" })
+
+-- goto preview
+vim.keymap.set("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", {noremap=true, desc = "Go to preview"})
 
 -- diagnostics
 vim.keymap.set("n", "<S-q>", vim.diagnostic.open_float, { desc = "Show diagnostic details" })
+
+vim.keymap.set("n", "<ESC>", ":noh<CR>", { desc = "Clear search" })
 
 -- rename function that i defnitely wrote
 vim.keymap.set("n", "<leader>r", function()
@@ -341,7 +369,6 @@ local function insert_namespace()
 end
 
 vim.keymap.set("n", "<leader>ns", insert_namespace, { desc = "Insert C++ namespace" })
-
 
 -- helper for deleting C++ class copy constructor and operator
 local function insert_deleted_copy_ops()
